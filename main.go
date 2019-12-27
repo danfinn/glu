@@ -19,6 +19,8 @@ import (
 	"time"
 )
 
+const GitlabURL = "https://git.domain.com/api/v4/"
+
 type GitlabUsers []struct {
 	ID              int       `json:"id"`
 	Name            string    `json:"name"`
@@ -57,7 +59,7 @@ func (s GitlabUsers) Swap(i, j int) {
 // whether or not to limit the search to active users.  It returns a GitlabUsers struct populated with users
 func getUsers(t string, a bool) GitlabUsers {
 	a_str := strconv.FormatBool(a)
-	response, httpErr := http.Get("https://git.plansource.com/api/v4/users?active=" + a_str + "&external=false&order_by=id&page=1&per_page=100&skip_ldap=false&sort=desc&with_custom_attributes=false&private_token=" + t)
+	response, httpErr := http.Get(GitlabURL + "users?active=" + a_str + "&external=false&order_by=id&page=1&per_page=100&skip_ldap=false&sort=desc&with_custom_attributes=false&private_token=" + t)
 	check(httpErr)
 	defer response.Body.Close()
 	data, responseErr := ioutil.ReadAll(response.Body)
@@ -72,7 +74,7 @@ func getUsers(t string, a bool) GitlabUsers {
 	// Retrieve additional pages if needed
 	for ; currentPage < totalPages; currentPage++ {
 		nextPage := strconv.Itoa(currentPage + 1)
-		response, httpErr := http.Get("https://git.plansource.com/api/v4/users?active=" + a_str + "&external=false&order_by=id&page=" + nextPage + "&per_page=100&skip_ldap=false&sort=desc&with_custom_attributes=false&private_token=" + t)
+		response, httpErr := http.Get(GitlabURL + "users?active=" + a_str + "&external=false&order_by=id&page=" + nextPage + "&per_page=100&skip_ldap=false&sort=desc&with_custom_attributes=false&private_token=" + t)
 		check(httpErr)
 		defer response.Body.Close()
 		data, responseErr := ioutil.ReadAll(response.Body)
@@ -166,7 +168,7 @@ func createUser(t string) {
 	bytesRepresentation, err := json.Marshal(payload)
 	check(err)
 
-	resp, postErr := http.Post("https://git.plansource.com/api/v4/users?private_token="+t, "application/json", bytes.NewBuffer(bytesRepresentation))
+	resp, postErr := http.Post(GitlabURL + "users?private_token=" + t, "application/json", bytes.NewBuffer(bytesRepresentation))
 	check(postErr)
 
 	fmt.Println(resp.Status)
@@ -174,7 +176,7 @@ func createUser(t string) {
 
 // blockUser takes an API token and a user ID to block
 func blockUser(t string, u string) {
-	resp, postErr := http.Post("https://git.plansource.com/api/v4/users/"+u+"/block?private_token="+t, "application/x-www-form-urlencoded", io.Reader(nil))
+	resp, postErr := http.Post(GitlabURL + "users/" + u + "/block?private_token=" + t, "application/x-www-form-urlencoded", io.Reader(nil))
 	check(postErr)
 
 	// handle respose from block call
@@ -200,7 +202,7 @@ func main() {
 	var token string
 	var create bool
 	var bu string
-	flag.StringVar(&token, "t", "yYQiUHt_fKot7T6L6Fv8", "Gitlab access token")
+	flag.StringVar(&token, "t", "YOUR_ACCESS_TOKEN_HERE", "Gitlab access token")
 	flag.StringVar(&searchText, "s", "", "search userbase")
 	flag.BoolVar(&create, "c", false, "create user")
 	flag.BoolVar(&active, "a", true, "limit search to active users")
