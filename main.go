@@ -168,7 +168,7 @@ func createUser(t string) {
 	bytesRepresentation, err := json.Marshal(payload)
 	check(err)
 
-	resp, postErr := http.Post(GitlabURL + "users?private_token=" + t, "application/json", bytes.NewBuffer(bytesRepresentation))
+	resp, postErr := http.Post(GitlabURL+"users?private_token="+t, "application/json", bytes.NewBuffer(bytesRepresentation))
 	check(postErr)
 
 	fmt.Println(resp.Status)
@@ -176,7 +176,7 @@ func createUser(t string) {
 
 // blockUser takes an API token and a user ID to block
 func blockUser(t string, u string) {
-	resp, postErr := http.Post(GitlabURL + "users/" + u + "/block?private_token=" + t, "application/x-www-form-urlencoded", io.Reader(nil))
+	resp, postErr := http.Post(GitlabURL+"users/"+u+"/block?private_token="+t, "application/x-www-form-urlencoded", io.Reader(nil))
 	check(postErr)
 
 	// handle respose from block call
